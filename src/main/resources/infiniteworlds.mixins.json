@@ -1,0 +1,26 @@
+{
+  "required": true,
+  "package": "com.noodlegamer76.infiniteworlds.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "infiniteworld.refmap.json",
+  "client": [
+    "LevelRendererMixin",
+    "RenderChunkRegionMixin",
+    "RenderRegionCacheMixin",
+    "SectionCompilerMixin",
+    "ViewAreaMixin",
+    "accessor.LevelRendererAccessor",
+    "accessor.SectionRenderDispatcherAccessor",
+    "accessor.VertexBufferAccessor"
+  ],
+  "minVersion": "0.8",
+  "mixins": [
+    "BlockCollisionsMixin",
+    "ChunkAccessMixin",
+    "LevelChunkMixin",
+    "LevelMixin",
+    "MinecraftServerMixin",
+    "accessor.BlockCollisionsAccessor",
+    "accessor.ChunkAccessAccessor"
+  ]
+}
