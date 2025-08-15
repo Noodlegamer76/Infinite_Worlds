@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.minecraft.client.renderer.chunk",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "infiniteworld_minecraft.refmap.json",
+  "client": [
+    "SectionRenderDispatcherAccessor"
+  ],
+  "minVersion": "0.8",
+  "mixins": [
+  ]
+}

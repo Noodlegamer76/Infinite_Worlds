@@ -10,47 +10,51 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChunkManagerStorage {
-    private static final Map<ResourceKey<Level>, ChunkManager> MANAGERS = new HashMap<>();
+    private static final ThreadLocal<Map<ResourceKey<Level>, ChunkManager>> MANAGERS = ThreadLocal.withInitial(HashMap::new);
 
     public static ChunkManager getManager(Level level) {
         ResourceKey<Level> key = level.dimension();
 
         if (level instanceof ServerLevel serverLevel) {
-            ChunkManager manager = MANAGERS.computeIfAbsent(key, k -> new ChunkManager(serverLevel));
+            ChunkManager manager = MANAGERS.get().computeIfAbsent(key, k -> new ChunkManager(serverLevel));
 
             ResourceKey<Level> layerKey = LayerUtils.getLevelKey(serverLevel, 1);
             ServerLevel layerLevel = serverLevel.getServer().getLevel(layerKey);
             if (layerLevel != null) {
-                MANAGERS.putIfAbsent(layerKey, manager);
+                MANAGERS.get().putIfAbsent(layerKey, manager);
             }
 
             return manager;
         }
 
-        return MANAGERS.computeIfAbsent(key, k -> new ChunkManager(level));
+        return MANAGERS.get().computeIfAbsent(key, k -> new ChunkManager(level));
     }
 
     public static ChunkManager getManagerForLayer(ServerLevel layerLevel) {
         if (layerLevel == null) return null;
         ResourceKey<Level> layerKey = layerLevel.dimension();
-        ChunkManager m = MANAGERS.get(layerKey);
+        ChunkManager m = MANAGERS.get().get(layerKey);
         if (m != null) return m;
 
-        for (ChunkManager candidate : MANAGERS.values()) {
+        for (ChunkManager candidate : MANAGERS.get().values()) {
             if (candidate.getLayerLevel() == layerLevel) return candidate;
         }
         return null;
     }
 
     public static void removeManager(Level level) {
-        MANAGERS.remove(level.dimension());
+        MANAGERS.get().remove(level.dimension());
     }
 
     public static boolean containsManager(Level level) {
-        return MANAGERS.containsKey(level.dimension());
+        return MANAGERS.get().containsKey(level.dimension());
     }
 
     public static Collection<ChunkManager> getAllManagers() {
-        return MANAGERS.values();
+        return MANAGERS.get().values();
+    }
+
+    public static void clear() {
+        MANAGERS.get().clear();
     }
 }

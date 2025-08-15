@@ -15,7 +15,7 @@ public class ChangeClientLevelEvent {
     public static void unloadClientLevelEvent(LevelEvent.Unload event) {
         if (event.getLevel().isClientSide()) {
             StackedChunkRenderer.clear();
-            ChunkManagerStorage.getManager((Level) event.getLevel()).clear();
+            ChunkManagerStorage.clear();
         }
     }
 

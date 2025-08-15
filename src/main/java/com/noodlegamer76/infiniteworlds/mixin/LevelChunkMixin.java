@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -61,6 +62,48 @@ public abstract class LevelChunkMixin {
         cir.setReturnValue(section.getBlockState(lx, ly, lz));
     }
 
+    @Inject(
+            method = "setBlockState",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void setBlockStateStacked(BlockPos pos, BlockState state, boolean isMoving, CallbackInfoReturnable<BlockState> cir) {
+        Level level = getLevel();
+        if (level == null || level.isClientSide) {
+            return;
+        }
 
+        ChunkManager manager = ChunkManagerStorage.getManager(level);
+        if (manager == null) {
+            return;
+        }
 
+        final int sectionsPerLevel = Math.max(1, level.getSectionsCount());
+        final int minSection = level.getMinSection();
+        final int sectionY = SectionPos.blockToSectionCoord(pos.getY());
+
+        final int baseLayerSectionY = minSection + Math.floorDiv(sectionY - minSection, sectionsPerLevel) * sectionsPerLevel;
+        SectionPos baseLayerSectionPos = SectionPos.of(
+                SectionPos.blockToSectionCoord(pos.getX()),
+                baseLayerSectionY,
+                SectionPos.blockToSectionCoord(pos.getZ())
+        );
+
+        LevelChunk layerChunk = manager.getBaseChunk(baseLayerSectionPos);
+        if (layerChunk == null) {
+            return;
+        }
+
+        int localSectionCount = layerChunk.getSectionsCount();
+        int sectionIndexInChunk = Math.floorMod(sectionY - layerChunk.getMinSection(), localSectionCount);
+
+        LevelChunkSection section = layerChunk.getSection(sectionIndexInChunk);
+
+        int lx = pos.getX() & 15;
+        int ly = pos.getY() & 15;
+        int lz = pos.getZ() & 15;
+
+        BlockState oldState = section.setBlockState(lx, ly, lz, state);
+        cir.setReturnValue(oldState);
+    }
 }

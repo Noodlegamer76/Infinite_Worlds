@@ -9,6 +9,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.chunk.RenderRegionCache;
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.phys.Vec3;
@@ -49,6 +50,7 @@ public class StackedChunkRenderer {
                 dirtySections.remove(section);
             }
         }
+        unbuilt.clear();
         stackedSections.clear();
         removeAllRemovedChunks();
     }
@@ -102,15 +104,16 @@ public class StackedChunkRenderer {
         if (!camPos.equals(lastCameraPos)) {
             lastCameraPos = camPos;
 
-            List<ChunkRenderSection> tempList;
             synchronized (dirtySections) {
-                tempList = new ArrayList<>(dirtySections);
-            }
-            for (ChunkRenderSection section : tempList) {
-                section.updateDistance(camPos);
-            }
-            synchronized (dirtySections) {
+                List<ChunkRenderSection> tempList = new ArrayList<>(dirtySections);
                 dirtySections.clear();
+
+                for (ChunkRenderSection section : tempList) {
+                    section.updateDistance(camPos);
+                }
+
+                tempList.sort(Comparator.comparingDouble(ChunkRenderSection::getCachedDistance));
+
                 dirtySections.addAll(tempList);
             }
         }
@@ -120,6 +123,8 @@ public class StackedChunkRenderer {
             boolean rebuilt = rebuildNextDirtyChunk();
             if (!rebuilt) break;
         }
+
+        dispatcher.uploadAllPendingUploads();
     }
 
     public static boolean rebuildNextDirtyChunk() {
@@ -139,7 +144,33 @@ public class StackedChunkRenderer {
             return true;
         }
 
-        section.rebuild(level);
+        section.rebuild();
+
+        if (!section.shouldUpdateNeighborsNext) {
+            return true;
+        }
+        section.shouldUpdateNeighborsNext = false;
+
+        Map<SectionPos, ChunkRenderSection> sections = StackedChunkRenderer.getStackedSections();
+        SectionPos pos = section.getPos();
+        int[][] neighborOffsets = {
+                {1, 0, 0}, {-1, 0, 0},
+                {0, 1, 0}, {0, -1, 0},
+                {0, 0, 1}, {0, 0, -1}
+        };
+
+        for (int[] offset : neighborOffsets) {
+            SectionPos neighborPos = pos.offset(offset[0], offset[1], offset[2]);
+            ChunkRenderSection neighbor = sections.get(neighborPos);
+            if (neighbor != null) {
+                synchronized (dirtySections) {
+                    if (stackedSections.containsKey(neighbor.getPos())) {
+                        markDirty(neighborPos);
+                    }
+                }
+            }
+        }
+
         return true;
     }
 

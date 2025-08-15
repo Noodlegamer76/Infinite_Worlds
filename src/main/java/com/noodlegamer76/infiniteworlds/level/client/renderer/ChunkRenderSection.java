@@ -8,11 +8,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Map;
+
 public class ChunkRenderSection {
     private final SectionPos pos;
     private final SectionRenderDispatcher.RenderSection renderSection;
     private boolean removed = false;
     private double cachedDistance;
+    public static RenderRegionCache cache = new RenderRegionCache();
+    boolean shouldUpdateNeighborsNext = true;
 
     public ChunkRenderSection(SectionPos pos, SectionRenderDispatcher.RenderSection renderSection) {
         this.pos = pos;
@@ -27,14 +31,11 @@ public class ChunkRenderSection {
         return renderSection;
     }
 
-    public void rebuild(ClientLevel level) {
+    public void rebuild() {
         RenderChunkContext.set(pos.getY());
         try {
-            RenderRegionCache cache = new RenderRegionCache();
-
-            SectionRenderDispatcher dispatcher = StackedChunkRenderer.getDispatcher();
-            dispatcher.rebuildSectionSync(renderSection, cache);
-            dispatcher.uploadAllPendingUploads();
+            cache = new RenderRegionCache();
+            renderSection.rebuildSectionAsync(StackedChunkRenderer.getDispatcher(), cache);
         } finally {
             RenderChunkContext.clear();
         }
