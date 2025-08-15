@@ -21,7 +21,7 @@ public class RenderRegionCacheMixin {
         Integer y = RenderChunkContext.get();
         if (y != null) {
             SectionPos pos = SectionPos.of(chunkX, y, chunkZ);
-            LevelChunk chunk = ChunkManagerStorage.getManager(level).getChunk(pos);
+            LevelChunk chunk = ChunkManagerStorage.getManager(level).getBaseChunk(pos);
             if (chunk != null) {
                 return chunk;
             }

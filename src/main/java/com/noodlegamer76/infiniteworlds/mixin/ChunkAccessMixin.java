@@ -31,7 +31,7 @@ public abstract class ChunkAccessMixin {
     )
     public void isSectionEmpty(int y, CallbackInfoReturnable<Boolean> cir) {
         SectionPos pos = SectionPos.of(chunkPos.x, y, chunkPos.z);
-        LevelChunk chunk = ChunkManagerStorage.getManager(getLevel()).getChunk(pos);
+        LevelChunk chunk = ChunkManagerStorage.getManager(getLevel()).getBaseChunk(pos);
 
         if (chunk instanceof ClientStackedChunk) {
             cir.setReturnValue(chunk.isSectionEmpty(y));

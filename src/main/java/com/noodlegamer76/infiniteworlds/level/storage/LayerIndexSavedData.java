@@ -108,10 +108,11 @@ public class LayerIndexSavedData extends SavedData {
             return null;
         }
 
-        int step = baseLevel.getMaxBuildHeight() + baseLevel.getMinBuildHeight();
-        int offset = Math.floorDiv(pos.y(), step) * step;
+        final int sectionsPerLevel = Math.max(1, baseLevel.getSectionsCount());
 
-        LayerIndex index = new LayerIndex(iterator.next(), offset, pos);
+        final int offsetInSections = Math.floorDiv(pos.getY(), sectionsPerLevel) * sectionsPerLevel;
+
+        LayerIndex index = new LayerIndex(iterator.next(), offsetInSections, pos);
         putLayer(pos, index);
         return index;
     }

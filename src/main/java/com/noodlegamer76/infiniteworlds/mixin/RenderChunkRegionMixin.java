@@ -26,7 +26,7 @@ public class RenderChunkRegionMixin {
     )
     public void getBlockStateRedirect(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
         SectionPos chunkPos = SectionPos.of(pos);
-        LevelChunk chunk = ChunkManagerStorage.getManager(level).getChunk(chunkPos);
+        LevelChunk chunk = ChunkManagerStorage.getManager(level).getBaseChunk(chunkPos);
 
         if (chunk != null) {
             cir.setReturnValue(chunk.getBlockState(pos));

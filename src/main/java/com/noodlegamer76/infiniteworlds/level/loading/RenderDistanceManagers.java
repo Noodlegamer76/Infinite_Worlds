@@ -65,7 +65,7 @@ public class RenderDistanceManagers {
 
                 int offset = Math.floorMod(relativeY, sectionsPerLevel);
 
-                LevelChunk layerChunk = idxManager.getChunk(SectionPos.of(pos.getX(), baseLayerSectionY, pos.getZ()));
+                LevelChunk layerChunk = idxManager.getBaseChunk(SectionPos.of(pos.getX(), baseLayerSectionY, pos.getZ()));
 
                 if (layerChunk != null) {
                     chunks.add(new StackedChunkInfo(layerChunk, pos, offset));
@@ -84,5 +84,4 @@ public class RenderDistanceManagers {
             player.connection.send(payload);
         }
     }
-
 }

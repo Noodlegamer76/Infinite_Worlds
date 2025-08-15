@@ -2,12 +2,14 @@ package com.noodlegamer76.infiniteworlds.mixin;
 
 import com.noodlegamer76.infiniteworlds.level.ChunkManager;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
+import com.noodlegamer76.infiniteworlds.level.index.LayerIndex;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -54,10 +56,12 @@ public abstract class LevelMixin {
     @Shadow
     public abstract LevelChunk getChunk(int chunkX, int chunkZ);
 
+    @Shadow public abstract boolean isClientSide();
+
     @Inject(method = "getChunkAt", at = @At("TAIL"), cancellable = true)
     public void getChunkAtFix(BlockPos pos, CallbackInfoReturnable<LevelChunk> cir) {
         SectionPos chunkPos = SectionPos.of(pos);
-        LevelChunk chunk = ChunkManagerStorage.getManager((Level) (Object) this).getChunk(chunkPos);
+        LevelChunk chunk = ChunkManagerStorage.getManager((Level) (Object) this).getBaseChunk(chunkPos);
 
         if (chunk != null) {
             cir.setReturnValue(chunk);
@@ -70,36 +74,36 @@ public abstract class LevelMixin {
             cancellable = true
     )
     public void getBlockStateFix(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
-        SectionPos requestSection = SectionPos.of(pos);
         Level level = (Level) (Object) this;
+        if (level == null) return;
 
         ChunkManager manager = ChunkManagerStorage.getManager(level);
-        if (manager == null) {
-            return;
+        if (manager == null) return;
+
+        SectionPos baseLayerSectionPos;
+        if (!isClientSide()) {
+            final int sectionY = SectionPos.blockToSectionCoord(pos.getY());
+
+            final int sectionsPerLevel = Math.max(1, level.getSectionsCount());
+            final int minSection = level.getMinSection();
+            final int baseLayerSectionY = minSection + Math.floorDiv(sectionY - minSection, sectionsPerLevel) * sectionsPerLevel;
+
+            baseLayerSectionPos = SectionPos.of(
+                    SectionPos.blockToSectionCoord(pos.getX()),
+                    baseLayerSectionY,
+                    SectionPos.blockToSectionCoord(pos.getZ())
+            );
+        }
+        else {
+            baseLayerSectionPos = SectionPos.of(pos);
         }
 
-        int sectionsPerLevel = Math.max(1, level.getSectionsCount());
-        int minSection = level.getMinSection();
+        LevelChunk layerChunk = manager.getBaseChunk(baseLayerSectionPos);
+        if (layerChunk == null) return;
 
-        int sectionY = requestSection.getY();
-        int relativeSectionY = sectionY - minSection;
-
-        int baseLayerSectionY = minSection + Math.floorDiv(relativeSectionY, sectionsPerLevel) * sectionsPerLevel;
-        int sectionIndex = Math.floorMod(relativeSectionY, sectionsPerLevel);
-
-        SectionPos baseLayerSectionPos = SectionPos.of(requestSection.getX(), baseLayerSectionY, requestSection.getZ());
-        LevelChunk layerChunk = manager.getChunk(baseLayerSectionPos);
-
-        if (layerChunk == null) {
-            return;
-        }
-
-        int intraSectionY = Math.floorMod(pos.getY(), 16);
-        int mappedY = (baseLayerSectionY + sectionIndex) * 16 + intraSectionY;
-
-        BlockPos mappedPos = new BlockPos(pos.getX(), mappedY, pos.getZ());
-        cir.setReturnValue(layerChunk.getBlockState(mappedPos));
+        cir.setReturnValue(layerChunk.getBlockState(pos));
     }
+
 
     @Inject(
             method = "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z",
@@ -108,7 +112,7 @@ public abstract class LevelMixin {
     )
     public void setBlockStateFix(BlockPos pos, BlockState state, int flags, int recursionLeft, CallbackInfoReturnable<Boolean> cir) {
         SectionPos chunkPos = SectionPos.of(pos);
-        LevelChunk chunk = ChunkManagerStorage.getManager((Level) (Object) this).getChunk(chunkPos);
+        LevelChunk chunk = ChunkManagerStorage.getManager((Level) (Object) this).getBaseChunk(chunkPos);
 
         if (chunk != null) {
             Level level = (Level) (Object) this;

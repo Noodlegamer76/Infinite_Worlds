@@ -154,49 +154,45 @@ public class LayerTicketManager {
     }
 
     public List<SectionPos> getStackedChunksInAABB(AABB box) {
-        List<SectionPos> chunks = new ArrayList<>();
+        Set<SectionPos> uniqueBaseChunks = new HashSet<>();
+
+        int minSectionX = SectionPos.blockToSectionCoord((int) Math.floor(box.minX));
+        int maxSectionX = SectionPos.blockToSectionCoord((int) Math.floor(box.maxX));
+        int minSectionY = SectionPos.blockToSectionCoord((int) Math.floor(box.minY));
+        int maxSectionY = SectionPos.blockToSectionCoord((int) Math.floor(box.maxY));
+        int minSectionZ = SectionPos.blockToSectionCoord((int) Math.floor(box.minZ));
+        int maxSectionZ = SectionPos.blockToSectionCoord((int) Math.floor(box.maxZ));
 
         int worldHeightInSections = Math.max(1, baseLevel.dimensionType().height() / 16);
         int vanillaMinSection = baseLevel.getMinSection();
         int vanillaMaxSection = baseLevel.getMaxSection();
 
-        int minChunkX = SectionPos.blockToSectionCoord((int) Math.floor(box.minX));
-        int maxChunkX = SectionPos.blockToSectionCoord((int) Math.floor(box.maxX));
-        int minChunkZ = SectionPos.blockToSectionCoord((int) Math.floor(box.minZ));
-        int maxChunkZ = SectionPos.blockToSectionCoord((int) Math.floor(box.maxZ));
+        for (int x = minSectionX; x <= maxSectionX; x++) {
+            for (int y = minSectionY; y <= maxSectionY; y++) {
+                for (int z = minSectionZ; z <= maxSectionZ; z++) {
+                    int relativeY = y - vanillaMinSection;
+                    int baseY = vanillaMinSection + Math.floorDiv(relativeY, worldHeightInSections) * worldHeightInSections;
 
-        int minSectionY = SectionPos.blockToSectionCoord((int) Math.floor(box.minY));
-        int maxSectionY = SectionPos.blockToSectionCoord((int) Math.floor(box.maxY));
-
-        int relativeMinY = minSectionY - vanillaMinSection;
-        int relativeMaxY = maxSectionY - vanillaMinSection;
-
-        int baseMinY = vanillaMinSection + Math.floorDiv(relativeMinY, worldHeightInSections) * worldHeightInSections;
-        int baseMaxY = vanillaMinSection + Math.floorDiv(relativeMaxY, worldHeightInSections) * worldHeightInSections;
-
-        if (baseMaxY < baseMinY) {
-            int temp = baseMaxY;
-            baseMaxY = baseMinY;
-            baseMinY = temp;
-        }
-
-        for (int x = minChunkX; x <= maxChunkX; x++) {
-            for (int baseY = baseMinY; baseY <= baseMaxY; baseY += worldHeightInSections) {
-                if (isVanillaBaseLayerOverlap(baseY, worldHeightInSections, vanillaMinSection, vanillaMaxSection)) continue;
-                for (int z = minChunkZ; z <= maxChunkZ; z++) {
-                    chunks.add(SectionPos.of(x, baseY, z));
+                    if (!isVanillaLayer(baseY, vanillaMinSection, vanillaMaxSection)) {
+                        uniqueBaseChunks.add(SectionPos.of(x, baseY, z));
+                    }
                 }
             }
         }
 
-        return chunks;
+        return new ArrayList<>(uniqueBaseChunks);
     }
 
-
-    private boolean isVanillaBaseLayerOverlap(int baseYInSections, int heightInSections, int vanillaMinSection, int vanillaMaxSection) {
-        if (heightInSections <= 0) return false;
-        int layerMaxY = baseYInSections + heightInSections;
-        return baseYInSections < vanillaMaxSection + 1 && layerMaxY > vanillaMinSection;
+    /**
+     * Checks if a given base layer's starting Y position falls within the vanilla world's vertical bounds.
+     *
+     * @param baseYInSections The starting Y position of the base layer.
+     * @param vanillaMinSection The minimum section Y of the vanilla world.
+     * @param vanillaMaxSection The maximum section Y of the vanilla world.
+     * @return True if the base layer is the vanilla layer, false otherwise.
+     */
+    private boolean isVanillaLayer(int baseYInSections, int vanillaMinSection, int vanillaMaxSection) {
+        return baseYInSections >= vanillaMinSection && baseYInSections < vanillaMaxSection;
     }
 
     public static AABB getPlayerTicketArea(ServerPlayer player) {

@@ -31,22 +31,35 @@ public abstract class BlockCollisionsMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/BlockCollisions;getChunk(II)Lnet/minecraft/world/level/BlockGetter;")
     )
     public BlockGetter getStackedChunkForCollision(BlockCollisions instance, int x, int z) {
-        int sectionX = SectionPos.blockToSectionCoord(x);
-        int sectionY = SectionPos.blockToSectionCoord(cursor.nextY());
-        int sectionZ = SectionPos.blockToSectionCoord(z);
-        SectionPos chunkPos = SectionPos.of(sectionX, sectionY, sectionZ);
-
         Level level = ((BlockCollisionsAccessor) this).getCollisionGetter() instanceof Level collisionGetter ? collisionGetter : null;
+        if (level == null) return getChunk(x, z);
 
-        LevelChunk chunk = null;
-        if (level != null) {
-            chunk = ChunkManagerStorage.getManager(level).getChunk(chunkPos);
-        }
+        int sectionsPerLevel = Math.max(1, level.getSectionsCount());
 
-        if (chunk != null) {
-            return chunk;
-        }
+        int absSectionY = SectionPos.blockToSectionCoord(cursor.nextY());
+        int baseLayerSectionY = Math.floorDiv(absSectionY, sectionsPerLevel) * sectionsPerLevel;
+        SectionPos baseLayerChunkPos;
+
+       if (level.isClientSide) {
+           baseLayerChunkPos = SectionPos.of(
+                   SectionPos.blockToSectionCoord(x),
+                   SectionPos.blockToSectionCoord(cursor.nextY()),
+                   SectionPos.blockToSectionCoord(z)
+           );
+       }
+       else {
+           baseLayerChunkPos = SectionPos.of(
+                   SectionPos.blockToSectionCoord(x),
+                   baseLayerSectionY,
+                   SectionPos.blockToSectionCoord(z)
+           );
+       }
+
+        LevelChunk chunk = ChunkManagerStorage.getManager(level).getBaseChunk(baseLayerChunkPos);
+
+        if (chunk != null) return chunk;
 
         return getChunk(x, z);
     }
+
 }
