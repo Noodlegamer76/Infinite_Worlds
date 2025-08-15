@@ -18,7 +18,7 @@ public class LoadUtils {
             ServerLevel baseLevel) {
 
         ChunkManager manager = ChunkManagerStorage.getManager(baseLevel);
-        ServerLevel layerLevel = (ServerLevel) manager.layerLevel;
+        ServerLevel layerLevel = (ServerLevel) manager.getLayerLevel();
         ServerChunkCache cache = layerLevel.getChunkSource();
 
         LayerIndex layerIndex = manager.layerIndexSavedData.getIndexFromBaseWorld(basePos);
@@ -41,7 +41,7 @@ public class LoadUtils {
             ServerLevel baseLevel) {
 
         ChunkManager manager = ChunkManagerStorage.getManager(baseLevel);
-        ServerLevel layerLevel = (ServerLevel) manager.layerLevel;
+        ServerLevel layerLevel = (ServerLevel) manager.getLayerLevel();
         ServerChunkCache cache = layerLevel.getChunkSource();
 
         LayerIndex layerIndex = manager.layerIndexSavedData.getIndexFromBaseWorld(basePos);

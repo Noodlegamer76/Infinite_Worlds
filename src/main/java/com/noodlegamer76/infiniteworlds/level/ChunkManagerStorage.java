@@ -37,7 +37,7 @@ public class ChunkManagerStorage {
         if (m != null) return m;
 
         for (ChunkManager candidate : MANAGERS.values()) {
-            if (candidate.layerLevel == layerLevel) return candidate;
+            if (candidate.getLayerLevel() == layerLevel) return candidate;
         }
         return null;
     }

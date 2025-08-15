@@ -16,9 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChunkManager {
-    private final Map<SectionPos, LevelChunk> chunks = new HashMap<>();
+    private final ThreadLocal<Map<SectionPos, LevelChunk>> chunks = ThreadLocal.withInitial(HashMap::new);
     public final Level baseLevel;
-    public final Level layerLevel;
+    private Level layerLevel;
     public final LayerIndexSavedData layerIndexSavedData;
     public final LayerIndexManagerSavedData layerIndexManagerSavedData;
     public final LayerTicketManager ticketManager;
@@ -33,7 +33,6 @@ public class ChunkManager {
             this.ticketManager = new LayerTicketManager(serverLevel);
         }
         else {
-            this.layerLevel = null;
             layerIndexManagerSavedData = null;
             layerIndexSavedData = null;
             this.ticketManager = null;
@@ -41,22 +40,30 @@ public class ChunkManager {
     }
 
     public Map<SectionPos, LevelChunk> getChunks() {
-        return chunks;
+        return chunks.get();
     }
 
     public LevelChunk getChunk(SectionPos pos) {
-        return chunks.get(pos);
+        return chunks.get().get(pos);
     }
 
     public LevelChunk addChunk(SectionPos pos, LevelChunk chunk) {
-        return chunks.put(pos, chunk);
+        return chunks.get().put(pos, chunk);
     }
 
     public LevelChunk removeChunk(SectionPos pos) {
-        return chunks.remove(pos);
+        return chunks.get().remove(pos);
     }
 
     public void clear() {
-        chunks.clear();
+        chunks.get().clear();
+    }
+
+    public Level getLayerLevel() {
+        if (layerLevel == null && baseLevel instanceof ServerLevel serverLevel) {
+            ResourceKey<Level> layerLevelKey = LayerUtils.getLevelKey(serverLevel, 1);
+            this.layerLevel = baseLevel.getServer().getLevel(layerLevelKey);
+        }
+        return layerLevel;
     }
 }
