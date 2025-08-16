@@ -3,6 +3,7 @@ package com.noodlegamer76.infiniteworlds.level.loading;
 import com.noodlegamer76.infiniteworlds.Config;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.index.LayerIndex;
+import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +25,7 @@ public class LayerRenderDistanceManager {
     }
 
     public void updateQueuedChunksForPlayer(ServerPlayer player, int horizontalRenderDistanceChunks, int verticalRenderDistanceChunks) {
-        LayerTicketManager ticketManager = ChunkManagerStorage.getManager(baseLevel).ticketManager;
+        LayerTicketManager ticketManager = ((LevelWithManager) baseLevel).infiniteWorlds$getChunkManager().ticketManager;
         Set<LayerIndex> loadedLayers = ticketManager.getActiveTickets();
 
         double px = player.getX();

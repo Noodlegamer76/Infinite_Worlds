@@ -4,6 +4,7 @@ import com.noodlegamer76.infiniteworlds.level.ChunkManager;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.index.LayerIndex;
 import com.noodlegamer76.infiniteworlds.level.util.ChunkPosIterator;
+import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -102,7 +103,7 @@ public class LayerIndexSavedData extends SavedData {
     }
 
     public LayerIndex createIndexFromBaseWorld(SectionPos pos, ServerLevel baseLevel) {
-        ChunkManager manager = ChunkManagerStorage.getManager(baseLevel);
+        ChunkManager manager = ((LevelWithManager) baseLevel).infiniteWorlds$getChunkManager();
         ChunkPosIterator iterator = manager.layerIndexManagerSavedData.getIterator();
         if (iterator == null) {
             return null;

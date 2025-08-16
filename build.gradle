@@ -18,7 +18,9 @@ version = mod_version
 group = mod_group_id
 
 repositories {
-    // Add here additional repositories if required by some of the dependencies below.
+    maven {
+        url "https://cursemaven.com"
+    }
 }
 
 base {
@@ -48,12 +50,16 @@ neoForge {
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            jvmArgument('-Xmx6G')
+            jvmArgument('-Xms4G')
         }
 
         server {
             server()
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            jvmArgument('-Xmx6G')
+            jvmArgument('-Xms4G')
         }
 
         // This run config launches GameTestServer and runs all registered gametests, then exits.
@@ -112,6 +118,7 @@ configurations {
 }
 
 dependencies {
+    implementation "curse.maven:spark-361579:6225208"
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"

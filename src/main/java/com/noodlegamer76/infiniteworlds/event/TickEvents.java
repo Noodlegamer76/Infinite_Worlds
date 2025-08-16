@@ -4,10 +4,17 @@ import com.noodlegamer76.infiniteworlds.InfiniteWorlds;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.loading.LayerTicketManager;
 import com.noodlegamer76.infiniteworlds.level.loading.RenderDistanceManagers;
+import com.noodlegamer76.infiniteworlds.level.util.LayerUtils;
+import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
+
+import java.util.Map;
 
 @EventBusSubscriber(modid = InfiniteWorlds.MODID)
 public class TickEvents {
@@ -23,7 +30,7 @@ public class TickEvents {
             }
 
             if (!level.dimension().location().toString().endsWith("_layer_1")) {
-                LayerTicketManager manager = ChunkManagerStorage.getManager(level).ticketManager;
+                LayerTicketManager manager = ((LevelWithManager) level).infiniteWorlds$getChunkManager().ticketManager;
 
                 if (manager == null) {
                     return;
@@ -44,5 +51,12 @@ public class TickEvents {
         RenderDistanceManagers.tick(event.getServer());
     }
 
+
+    @SubscribeEvent
+    public static void preTick(LevelTickEvent.Pre event) {
+        for (Map.Entry<Level, LayerUtils> entry: LayerUtils.LAYER_UTILS_MAP.entrySet()) {
+            entry.getValue().tickCache();
+        }
+    }
 
 }

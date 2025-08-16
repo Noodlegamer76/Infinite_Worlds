@@ -3,6 +3,7 @@ package com.noodlegamer76.infiniteworlds.level.client.renderer;
 import com.noodlegamer76.infiniteworlds.Config;
 import com.noodlegamer76.infiniteworlds.InfiniteWorlds;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
+import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import com.noodlegamer76.infiniteworlds.mixin.accessor.LevelRendererAccessor;
 import com.noodlegamer76.infiniteworlds.mixin.accessor.SectionRenderDispatcherAccessor;
 import net.minecraft.client.Camera;
@@ -93,7 +94,7 @@ public class StackedChunkRenderer {
             double horizontalDist = Math.sqrt(dx * dx + dz * dz);
 
             if (horizontalDist > renderDistance || dy > yRenderDistance) {
-                ChunkManagerStorage.getManager(Minecraft.getInstance().level).removeChunk(pos);
+                ((LevelWithManager) level).infiniteWorlds$getChunkManager().removeChunk(pos);
                 removeStackedChunk(pos);
             }
         }

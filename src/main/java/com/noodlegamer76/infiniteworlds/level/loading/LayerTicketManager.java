@@ -4,6 +4,7 @@ import com.noodlegamer76.infiniteworlds.Config;
 import com.noodlegamer76.infiniteworlds.level.ChunkManager;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.index.LayerIndex;
+import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,7 +41,7 @@ public class LayerTicketManager {
                 continue;
             }
 
-            ChunkManager manager = ChunkManagerStorage.getManager(baseLevel);
+            ChunkManager manager = ((LevelWithManager) baseLevel).infiniteWorlds$getChunkManager();
             AABB playerTicketArea = getPlayerTicketArea(player);
 
             int worldHeightInSections = Math.max(1, baseLevel.dimensionType().height() / 16);
@@ -85,7 +86,7 @@ public class LayerTicketManager {
 
     public void processQueuedTickets() {
         int created = 0;
-        ChunkManager manager = ChunkManagerStorage.getManager(baseLevel);
+        ChunkManager manager = ((LevelWithManager) baseLevel).infiniteWorlds$getChunkManager();
         while (created < CREATE_INDICES_PER_TICK && !indicesToCreate.isEmpty()) {
             SectionPos pos = indicesToCreate.poll();
             indicesToCreateSet.remove(pos);

@@ -3,6 +3,7 @@ package com.noodlegamer76.infiniteworlds.level.loading;
 import com.noodlegamer76.infiniteworlds.Config;
 import com.noodlegamer76.infiniteworlds.level.ChunkManager;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
+import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import com.noodlegamer76.infiniteworlds.network.stackedchunk.StackedChunkInfo;
 import com.noodlegamer76.infiniteworlds.network.stackedchunk.StackedChunkPayload;
 import net.minecraft.core.SectionPos;
@@ -51,7 +52,7 @@ public class RenderDistanceManagers {
                 chunksToSend = chunksToSend.subList(0, maxPerSend);
             }
 
-            ChunkManager idxManager = ChunkManagerStorage.getManager(level);
+            ChunkManager idxManager = ((LevelWithManager) level).infiniteWorlds$getChunkManager();
             List<StackedChunkInfo> chunks = new ArrayList<>(chunksToSend.size());
 
             int sectionsPerLevel = level.getSectionsCount();
@@ -79,7 +80,7 @@ public class RenderDistanceManagers {
 
             StackedChunkPayload payload = new StackedChunkPayload(chunks);
             for (StackedChunkInfo chunk: chunks) {
-                ChunkManagerStorage.getManager(level).addChunk(chunk.pos(), chunk.chunk());
+                ((LevelWithManager) level).infiniteWorlds$getChunkManager().addChunk(chunk.pos(), chunk.chunk());
             }
             player.connection.send(payload);
         }

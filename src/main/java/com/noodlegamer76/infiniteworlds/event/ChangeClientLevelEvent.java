@@ -3,6 +3,7 @@ package com.noodlegamer76.infiniteworlds.event;
 import com.noodlegamer76.infiniteworlds.InfiniteWorlds;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.client.renderer.StackedChunkRenderer;
+import com.noodlegamer76.infiniteworlds.level.util.LayerUtils;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -16,6 +17,7 @@ public class ChangeClientLevelEvent {
         if (event.getLevel().isClientSide()) {
             StackedChunkRenderer.clear();
             ChunkManagerStorage.clear();
+            LayerUtils.LAYER_UTILS_MAP.clear();
         }
     }
 

@@ -3,6 +3,7 @@ package com.noodlegamer76.infiniteworlds.level.loading;
 import com.noodlegamer76.infiniteworlds.level.ChunkManager;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.index.LayerIndex;
+import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -17,7 +18,7 @@ public class LoadUtils {
             boolean forceTicks,
             ServerLevel baseLevel) {
 
-        ChunkManager manager = ChunkManagerStorage.getManager(baseLevel);
+        ChunkManager manager = ((LevelWithManager) baseLevel).infiniteWorlds$getChunkManager();
         ServerLevel layerLevel = (ServerLevel) manager.getLayerLevel();
         ServerChunkCache cache = layerLevel.getChunkSource();
 
@@ -40,7 +41,7 @@ public class LoadUtils {
             boolean forceTicks,
             ServerLevel baseLevel) {
 
-        ChunkManager manager = ChunkManagerStorage.getManager(baseLevel);
+        ChunkManager manager = ((LevelWithManager) baseLevel).infiniteWorlds$getChunkManager();
         ServerLevel layerLevel = (ServerLevel) manager.getLayerLevel();
         ServerChunkCache cache = layerLevel.getChunkSource();
 

@@ -2,6 +2,7 @@ package com.noodlegamer76.infiniteworlds.mixin;
 
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.client.ClientStackedChunk;
+import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -31,7 +32,7 @@ public abstract class ChunkAccessMixin {
     )
     public void isSectionEmpty(int y, CallbackInfoReturnable<Boolean> cir) {
         SectionPos pos = SectionPos.of(chunkPos.x, y, chunkPos.z);
-        LevelChunk chunk = ChunkManagerStorage.getManager(getLevel()).getBaseChunk(pos);
+        LevelChunk chunk = ((LevelWithManager) getLevel()).infiniteWorlds$getChunkManager().getBaseChunk(pos);
 
         if (chunk instanceof ClientStackedChunk) {
             cir.setReturnValue(chunk.isSectionEmpty(y));
