@@ -1,7 +1,9 @@
 package com.noodlegamer76.infiniteworlds.mixin;
 
 import com.noodlegamer76.infiniteworlds.level.util.CreateLayer;
+import com.noodlegamer76.infiniteworlds.level.util.LayerUtils;
 import com.noodlegamer76.infiniteworlds.level.util.LevelCreationVariables;
+import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -43,6 +45,19 @@ public class MinecraftServerMixin {
 
         for (ServerLevel level: layers) {
             levels.put(level.dimension(), level);
+            if (!LayerUtils.isLevelStorageLevel(level)) {
+                ServerLevel serverLevel = null;
+                for (ServerLevel current: layers) {
+                    if (current.dimension().equals(LayerUtils.getLevelKey(level, 1))) {
+                        serverLevel = current;
+                        break;
+                    }
+                }
+                if (serverLevel == null) {
+                    continue;
+                }
+                ((LevelWithManager) serverLevel).infiniteWorlds$setChunkManager(((LevelWithManager) level).infiniteWorlds$getChunkManager());
+            }
         }
     }
 }

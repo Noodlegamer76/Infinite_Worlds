@@ -1,6 +1,5 @@
 package com.noodlegamer76.infiniteworlds.mixin;
 
-import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import net.minecraft.client.renderer.chunk.RenderChunkRegion;
 import net.minecraft.core.BlockPos;
@@ -27,7 +26,7 @@ public class RenderChunkRegionMixin {
     )
     public void getBlockStateRedirect(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
         SectionPos chunkPos = SectionPos.of(pos);
-        LevelChunk chunk = ((LevelWithManager) level).infiniteWorlds$getChunkManager().getBaseChunk(chunkPos);
+        LevelChunk chunk = ((LevelWithManager) level).infiniteWorlds$getChunkManager().getLayerChunk(chunkPos);
 
         if (chunk != null) {
             cir.setReturnValue(chunk.getBlockState(pos));

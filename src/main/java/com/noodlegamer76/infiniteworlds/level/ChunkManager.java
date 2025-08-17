@@ -1,9 +1,11 @@
 package com.noodlegamer76.infiniteworlds.level;
 
+import com.noodlegamer76.infiniteworlds.level.index.LayerIndex;
 import com.noodlegamer76.infiniteworlds.level.loading.LayerTicketManager;
 import com.noodlegamer76.infiniteworlds.level.storage.LayerIndexManagerSavedData;
 import com.noodlegamer76.infiniteworlds.level.storage.LayerIndexSavedData;
 import com.noodlegamer76.infiniteworlds.level.util.LayerUtils;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -44,7 +46,11 @@ public class ChunkManager {
         return layerChunkFromBase.get();
     }
 
-    public LevelChunk getBaseChunk(SectionPos pos) {
+    public ThreadLocal<Map<ChunkPos, LevelChunk>> getLayerChunkFromLayer() {
+        return layerChunkFromLayer;
+    }
+
+    public LevelChunk getLayerChunk(SectionPos pos) {
         return layerChunkFromBase.get().get(pos);
     }
 
@@ -52,25 +58,9 @@ public class ChunkManager {
         return layerChunkFromLayer.get().get(pos);
     }
 
-    public LevelChunk addBaseChunk(SectionPos pos, LevelChunk chunk) {
-        return layerChunkFromBase.get().putIfAbsent(pos, chunk);
-    }
-
-    public LevelChunk removeBaseChunk(SectionPos pos) {
-        return layerChunkFromBase.get().remove(pos);
-    }
-
-    public LevelChunk addLayerChunk(ChunkPos pos, LevelChunk chunk) {
-        return layerChunkFromLayer.get().putIfAbsent(pos, chunk);
-    }
-
-    public LevelChunk removeLayerChunk(ChunkPos pos) {
-        return layerChunkFromLayer.get().remove(pos);
-    }
-
-    public LevelChunk addChunk(SectionPos pos, LevelChunk chunk) {
-        layerChunkFromLayer.get().putIfAbsent(chunk.getPos(), chunk);
-        return layerChunkFromBase.get().putIfAbsent(pos, chunk);
+    public LevelChunk addChunk(SectionPos basePos, LevelChunk layerChunk) {
+        layerChunkFromLayer.get().putIfAbsent(layerChunk.getPos(), layerChunk);
+        return layerChunkFromBase.get().putIfAbsent(basePos, layerChunk);
     }
 
     public LevelChunk removeChunk(SectionPos pos) {

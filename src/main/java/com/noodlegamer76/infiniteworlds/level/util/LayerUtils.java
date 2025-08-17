@@ -2,7 +2,6 @@ package com.noodlegamer76.infiniteworlds.level.util;
 
 import com.noodlegamer76.infiniteworlds.InfiniteWorlds;
 import com.noodlegamer76.infiniteworlds.level.ChunkManager;
-import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -18,7 +17,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 public class LayerUtils {
     public static final Map<Level, LayerUtils> LAYER_UTILS_MAP = new HashMap<>();
@@ -50,7 +48,7 @@ public class LayerUtils {
             ChunkManager manager = ((LevelWithManager) level).infiniteWorlds$getChunkManager();
             if (manager == null) return null;
 
-            chunk = manager.getBaseChunk(SectionPos.of(pos.getX(), baseLayerY, pos.getZ()));
+            chunk = manager.getLayerChunk(SectionPos.of(pos.getX(), baseLayerY, pos.getZ()));
             if (chunk != null) {
                 chunkCache.put(chunkKey, chunk);
             }
@@ -79,6 +77,10 @@ public class LayerUtils {
         int localSectionCount = levelChunk.getSectionsCount();
         int sectionIndex = Math.floorMod(sectionY - levelChunk.getMinSection(), localSectionCount);
         return levelChunk.getSection(sectionIndex);
+    }
+
+    public static boolean isLevelStorageLevel(ServerLevel level) {
+        return level.dimension().location().toString().startsWith(InfiniteWorlds.MODID + ":") && level.dimension().location().toString().endsWith("_layer_1");
     }
 
     public static ResourceKey<Level> getLevelKey(ServerLevel baseLevel, int layer) {

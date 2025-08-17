@@ -147,11 +147,11 @@ public class LayerTicketManager {
     }
 
     public synchronized void addPlayerRegionTicket(LayerIndex index, ServerLevel baseLevel) {
-        LoadUtils.addTicketToStackedChunk(TicketType.FORCED, index.basePos, index.layerPos, true, baseLevel);
+        LoadUtils.addTicketToStackedChunk(TicketType.PLAYER, index.basePos, index.layerPos, true, baseLevel);
     }
 
     public synchronized void removePlayerRegionTicket(LayerIndex index, ServerLevel baseLevel) {
-        LoadUtils.removeTicketFromStackedChunk(TicketType.FORCED, index.basePos, index.layerPos, true, baseLevel);
+        LoadUtils.removeTicketFromStackedChunk(TicketType.PLAYER, index.basePos, index.layerPos, true, baseLevel);
     }
 
     public List<SectionPos> getStackedChunksInAABB(AABB box) {

@@ -1,6 +1,5 @@
 package com.noodlegamer76.infiniteworlds.mixin;
 
-import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.client.renderer.RenderChunkContext;
 import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import net.minecraft.client.renderer.chunk.RenderRegionCache;
@@ -22,7 +21,7 @@ public class RenderRegionCacheMixin {
         Integer y = RenderChunkContext.get();
         if (y != null) {
             SectionPos pos = SectionPos.of(chunkX, y, chunkZ);
-            LevelChunk chunk = ((LevelWithManager) level).infiniteWorlds$getChunkManager().getBaseChunk(pos);
+            LevelChunk chunk = ((LevelWithManager) level).infiniteWorlds$getChunkManager().getLayerChunk(pos);
             if (chunk != null) {
                 return chunk;
             }

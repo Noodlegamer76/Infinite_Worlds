@@ -2,21 +2,21 @@ package com.noodlegamer76.infiniteworlds.mixin;
 
 import com.noodlegamer76.infiniteworlds.level.ChunkManager;
 import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
+import com.noodlegamer76.infiniteworlds.level.index.LayerIndex;
 import com.noodlegamer76.infiniteworlds.level.util.LayerUtils;
 import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -73,6 +73,11 @@ public abstract class LevelMixin implements LevelWithManager {
     }
 
     @Unique
+    public ChunkManager infiniteWorlds$setChunkManager(ChunkManager manager) {
+        return infiniteWorlds$cachedManager = manager;
+    }
+
+    @Unique
     public LayerUtils infiniteWorlds$getLayerUtils() {
         return infiniteWorlds$cachedUtils == null ? infiniteWorlds$cachedUtils = LayerUtils.LAYER_UTILS_MAP.computeIfAbsent((Level) (Object) this, LayerUtils::new) : infiniteWorlds$cachedUtils;
     }
@@ -82,7 +87,7 @@ public abstract class LevelMixin implements LevelWithManager {
         if (infiniteWorlds$cachedManager == null) return;
         SectionPos chunkPos = SectionPos.of(pos);
 
-        LevelChunk chunk = infiniteWorlds$cachedManager.getBaseChunk(chunkPos);
+        LevelChunk chunk = infiniteWorlds$cachedManager.getLayerChunk(chunkPos);
 
         if (chunk != null) {
             cir.setReturnValue(chunk);
@@ -110,7 +115,7 @@ public abstract class LevelMixin implements LevelWithManager {
         else {
             baseLayerSectionPos = SectionPos.of(pos);
 
-            LevelChunk layerChunk = infiniteWorlds$cachedManager.getBaseChunk(baseLayerSectionPos);
+            LevelChunk layerChunk = infiniteWorlds$cachedManager.getLayerChunk(baseLayerSectionPos);
             if (layerChunk == null) return;
 
             cir.setReturnValue(layerChunk.getBlockState(pos));
@@ -138,7 +143,7 @@ public abstract class LevelMixin implements LevelWithManager {
         else {
             baseLayerSectionPos = SectionPos.of(pos);
 
-            LevelChunk layerChunk = infiniteWorlds$cachedManager.getBaseChunk(baseLayerSectionPos);
+            LevelChunk layerChunk = infiniteWorlds$cachedManager.getLayerChunk(baseLayerSectionPos);
             if (layerChunk == null) return;
 
             cir.setReturnValue(layerChunk.getFluidState(pos));
@@ -152,8 +157,9 @@ public abstract class LevelMixin implements LevelWithManager {
     )
     public void setBlockStateFix(BlockPos pos, BlockState state, int flags, int recursionLeft, CallbackInfoReturnable<Boolean> cir) {
         if (infiniteWorlds$cachedManager == null) return;
-        SectionPos chunkPos = SectionPos.of(pos);
-        LevelChunk chunk = infiniteWorlds$cachedManager.getBaseChunk(chunkPos);
+        SectionPos sectionPos = SectionPos.of(pos);
+
+        LevelChunk chunk = isClientSide ? infiniteWorlds$getChunkManager().getLayerChunk(sectionPos) : infiniteWorlds$getLayerUtils().getChunk(pos, (Level) (Object) this);
 
         if (chunk != null) {
             Level level = (Level) (Object) this;
@@ -163,7 +169,7 @@ public abstract class LevelMixin implements LevelWithManager {
                 this.capturedBlockSnapshots.add(blockSnapshot);
             }
 
-            BlockState old = getBlockState(pos);
+            BlockState old = chunk.getBlockState(pos);
             old.getLightEmission(level, pos);
             old.getLightBlock(level, pos);
             chunk.setBlockState(pos, state, (flags & 64) != 0);
@@ -175,9 +181,8 @@ public abstract class LevelMixin implements LevelWithManager {
                 cir.setReturnValue(false);
             } else {
                 if (blockSnapshot == null) {
-                    this.markAndNotifyBlock(pos, chunk, state, state, flags, recursionLeft);
+                    markAndNotifyBlock(pos, chunk, old, state, flags, recursionLeft);
                 }
-
                 cir.setReturnValue(true);
             }
         }

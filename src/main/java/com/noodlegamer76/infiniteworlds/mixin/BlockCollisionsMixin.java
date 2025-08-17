@@ -1,7 +1,5 @@
 package com.noodlegamer76.infiniteworlds.mixin;
 
-import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
-import com.noodlegamer76.infiniteworlds.level.util.LayerUtils;
 import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import com.noodlegamer76.infiniteworlds.mixin.accessor.BlockCollisionsAccessor;
 import net.minecraft.core.BlockPos;
@@ -10,7 +8,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockCollisions;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +40,7 @@ public abstract class BlockCollisionsMixin {
                     SectionPos.blockToSectionCoord(cursor.nextY()),
                     SectionPos.blockToSectionCoord(z)
             );
-            LevelChunk levelChunk = ((LevelWithManager) level).infiniteWorlds$getChunkManager().getBaseChunk(baseLayerChunkPos);
+            LevelChunk levelChunk = ((LevelWithManager) level).infiniteWorlds$getChunkManager().getLayerChunk(baseLayerChunkPos);
             if (levelChunk != null) {
                 return levelChunk;
             }

@@ -2,7 +2,6 @@ package com.noodlegamer76.infiniteworlds.level.loading;
 
 import com.noodlegamer76.infiniteworlds.Config;
 import com.noodlegamer76.infiniteworlds.level.ChunkManager;
-import com.noodlegamer76.infiniteworlds.level.ChunkManagerStorage;
 import com.noodlegamer76.infiniteworlds.level.util.LevelWithManager;
 import com.noodlegamer76.infiniteworlds.network.stackedchunk.StackedChunkInfo;
 import com.noodlegamer76.infiniteworlds.network.stackedchunk.StackedChunkPayload;
@@ -66,7 +65,7 @@ public class RenderDistanceManagers {
 
                 int offset = Math.floorMod(relativeY, sectionsPerLevel);
 
-                LevelChunk layerChunk = idxManager.getBaseChunk(SectionPos.of(pos.getX(), baseLayerSectionY, pos.getZ()));
+                LevelChunk layerChunk = idxManager.getLayerChunk(SectionPos.of(pos.getX(), baseLayerSectionY, pos.getZ()));
 
                 if (layerChunk != null) {
                     chunks.add(new StackedChunkInfo(layerChunk, pos, offset));

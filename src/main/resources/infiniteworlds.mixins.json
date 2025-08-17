@@ -20,6 +20,10 @@
     "LevelChunkMixin",
     "LevelMixin",
     "MinecraftServerMixin",
+    "ServerChunkCacheMixin",
+    "ServerGamePacketListenerImplMixin",
+    "ServerLevelMixin",
+    "ServerPlayerGameModeMixin",
     "accessor.BlockCollisionsAccessor",
     "accessor.ChunkAccessAccessor"
   ]
